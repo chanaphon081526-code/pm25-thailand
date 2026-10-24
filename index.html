@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ฝุ่นวันนี้ — PM2.5 ดูได้ใน 3 วินาที</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;700;800&family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+@property --tint { syntax: "<color>"; inherits: true; initial-value: #2bb6d9; }
+:root {
+  --tint: #2bb6d9; --base: #ffffff; --ink: #121a20; --muted: #43525d;
+  --panel: rgba(255,255,255,.78); --edge: rgba(18,26,32,.14);
+  --bg: color-mix(in srgb, var(--tint) 16%, var(--base));
+  --ok: #17803d; --warn: #9a6700; --no: #c62828;
+  transition: --tint .8s ease;
+  --head: "Kanit", "Noto Sans Thai", system-ui, sans-serif;
+  font-family: "Noto Sans Thai", system-ui, sans-serif; font-size: 100%;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --base: #0d1318; --ink: #f1f5f8; --muted: #b3c0ca; --panel: rgba(20,29,36,.8); --edge: rgba(255,255,255,.16);
+    --ok: #5fd68a; --warn: #f0c24b; --no: #ff8a8a; --bg: color-mix(in srgb, var(--tint) 20%, var(--base)); }
+}
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); font-size: 1.125rem; min-height: 100vh; line-height: 1.75;
+  background: radial-gradient(900px 480px at 85% -8%, color-mix(in srgb, var(--tint) 50%, transparent), transparent), var(--bg); }
+canvas#haze, #hills { position: fixed; pointer-events: none; z-index: 0; }
+canvas#haze { inset: 0; width: 100%; height: 100%; }
+#hills { left: 0; right: 0; bottom: 0; width: 100%; height: 34vh; }
+#hills path { transition: opacity .9s, filter .9s; }
+header { position: sticky; top: 0; z-index: 5; backdrop-filter: blur(14px); background: color-mix(in srgb, var(--bg) 70%, transparent);
+  border-bottom: 1px solid var(--edge); }
+.bar { max-width: 760px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 10px; align-items: center; }
+.logo { font-weight: 800; font-size: 1.2rem; margin-right: auto; }
+select, button { font: inherit; color: var(--ink); background: var(--panel); border: 1.5px solid var(--edge); border-radius: 14px;
+  min-height: 48px; padding: 8px 14px; }
+button { cursor: pointer; font-weight: 600; }
+select:focus-visible, button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+main { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 18px 16px 120px; display: grid; gap: 14px; }
+.card { background: var(--panel); border: 1px solid var(--edge); border-radius: 24px; padding: 20px; backdrop-filter: blur(10px); }
+.logo, .big b, .head, .badge, h2, .place, .chk { font-family: var(--head); }
+.place { font-weight: 600; color: var(--muted); margin: 0; }
+.big { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 0; }
+.big b { font-size: clamp(5.5rem, 30vw, 9.5rem); line-height: 1; font-weight: 800; letter-spacing: -.04em; }
+.big span { color: var(--muted); }
+.badge { display: inline-block; background: var(--tint); color: #111; font-weight: 800; padding: 4px 16px; border-radius: 999px; margin: 6px 0; }
+.head { font-size: 1.6rem; font-weight: 800; line-height: 1.3; margin: 6px 0 0; }
+.meta { color: var(--muted); font-size: .9rem; margin: 10px 0 0; }
+.checks { display: grid; gap: 10px; }
+.chk { display: flex; align-items: center; gap: 14px; font-weight: 600; }
+.chk i { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-weight: 800; font-size: 1.4rem;
+  border: 3px solid currentColor; }
+.chk small { display: block; font-weight: 400; color: var(--muted); font-size: .95rem; line-height: 1.3; }
+.s0 { color: var(--ok); } .s1 { color: var(--warn); } .s2 { color: var(--no); }
+.chk div { color: var(--ink); }
+.chk small { font-family: "Noto Sans Thai", system-ui, sans-serif; }
+h2 { font-size: 1.1rem; margin: 0 0 8px; }
+.c { display: inline-block; width: calc(70px * var(--w, 1)); height: 11px; margin: 0 7px 8px 0; border-radius: 3px;
+  background: linear-gradient(90deg, #e8a15e 0 25%, #f7f2e6 25%); box-shadow: 0 0 0 1px var(--edge); }
+.sub { color: var(--muted); font-size: .95rem; margin: 2px 0 0; }
+svg#chart { width: 100%; height: auto; display: block; color: var(--muted); }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: .9rem; color: var(--muted); }
+.legend i { display: inline-block; width: 20px; height: 4px; margin-right: 6px; vertical-align: middle; border-radius: 2px; }
+.note { border-left: 5px solid var(--warn); padding: 10px 14px; border-radius: 10px; background: var(--panel); font-size: .95rem; }
+.scale { position: relative; padding-top: 32px; }
+.seg { display: flex; height: 18px; border-radius: 999px; overflow: hidden; gap: 2px; }
+.seg i { display: block; }
+.mk { position: absolute; top: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; transition: left .8s ease; }
+.mk b { font-family: var(--head); font-size: .95rem; background: var(--ink); color: var(--base); padding: 0 12px; border-radius: 999px; line-height: 1.6; }
+.mk::after { content: ""; border: 6px solid transparent; border-top-color: var(--ink); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.chip { display: flex; align-items: center; gap: 6px; font-size: .9rem; line-height: 1.4; padding: 4px 12px; border-radius: 999px; border: 1.5px solid var(--edge); }
+.chip i { width: 12px; height: 12px; border-radius: 50%; background: var(--c); flex: none; }
+.chip.on { border-color: var(--ink); font-weight: 700; background: var(--panel); }
+.more { color: var(--muted); font-size: .95rem; }
+.more summary { cursor: pointer; font-weight: 600; color: var(--ink); min-height: 32px; }
+.more p { margin: 8px 0 0; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--base);
+  padding: 10px 18px; border-radius: 999px; z-index: 9; font-weight: 600; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.toast.on { opacity: 1; }
+</style>
+</head>
+<body>
+<canvas id="haze" aria-hidden="true"></canvas>
+<svg id="hills" viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true">
+  <path id="h1" d="M0 120 L70 70 L140 110 L230 50 L330 105 L420 60 L520 100 L600 70 L600 200 L0 200Z" fill="#8aa7b4"/>
+  <path id="h2" d="M0 150 L90 105 L170 140 L270 90 L380 145 L470 110 L600 150 L600 200 L0 200Z" fill="#5f8294"/>
+  <path id="h3" d="M0 180 L110 150 L210 175 L330 140 L450 178 L540 155 L600 175 L600 200 L0 200Z" fill="#34535f"/>
+</svg>
+
+<header><div class="bar">
+  <span class="logo">ฝุ่นวันนี้</span>
+  <label class="sr" style="position:absolute;left:-9999px" for="p1">จังหวัด</label>
+  <select id="p1"></select>
+  <button id="fs" aria-label="เปลี่ยนขนาดตัวอักษร">ก<sup>+</sup></button>
+  <button id="sh" aria-label="แชร์">แชร์</button>
+</div></header>
+
+<main id="out" aria-live="polite">
+  <section class="card">
+    <p class="place" id="place">กำลังโหลด…</p>
+    <p class="big"><b id="num">–</b><span>µg/m³ (PM2.5)</span></p>
+    <span class="badge" id="badge"></span>
+    <p class="head" id="head"></p>
+    <p class="meta" id="meta"></p>
+  </section>
+
+  <section class="card">
+    <h2>ตอนนี้ควรทำอย่างไร</h2>
+    <div class="checks" id="checks"></div>
+  </section>
+
+  <section class="card">
+    <h2>ลองคิดดู: หายใจวันนี้ทั้งวัน เท่ากับ…</h2>
+    <div id="cig"></div>
+    <p class="sub" id="cigtxt"></p>
+    <p class="sub" id="best" style="margin-top:12px"></p>
+  </section>
+
+  <section class="card">
+    <div class="row">
+      <h2 style="margin:0;margin-right:auto">ย้อนหลัง 7 วัน และคาดการณ์ 2 วัน</h2>
+      <select id="p2" aria-label="เปรียบเทียบกับ"></select>
+    </div>
+    <svg id="chart" viewBox="0 0 600 240" role="img" aria-label="กราฟค่า PM2.5 รายชั่วโมง"></svg>
+    <div class="legend" id="legend"></div>
+    <p class="sub" id="cmp"></p>
+  </section>
+
+  <section class="card">
+    <h2>ค่าเฉลี่ย 24 ชม. อยู่ตรงไหนของสเกล</h2>
+    <div class="scale"><div class="seg" id="seg"></div><div class="mk" id="mk"><b id="mkv"></b></div></div>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <details class="card more">
+    <summary>ที่มาของข้อมูลและข้อจำกัด</summary>
+    <p>ข้อมูลจาก Open-Meteo Air Quality API เป็นค่าจากแบบจำลองคอมพิวเตอร์ ไม่ใช่เครื่องวัดจริง จึงอาจต่างจากสถานีของกรมควบคุมมลพิษ</p>
+    <p>การเทียบเป็นมวนบุหรี่เป็นการประมาณของ Berkeley Earth (22 µg/m³ ≈ 1 มวนต่อวัน) ไม่ใช่คำแนะนำทางการแพทย์</p>
+  </details>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const PROVINCES = [
+  ["กาญจนบุรี",14.02,99.53],["กรุงเทพฯ",13.76,100.50],["เชียงใหม่",18.79,98.98],
+  ["เชียงราย",19.91,99.83],["แม่ฮ่องสอน",19.30,97.97],["ลำปาง",18.29,99.49],
+  ["น่าน",18.78,100.78],["ตาก",16.88,99.13],["พิษณุโลก",16.82,100.26],
+  ["นครสวรรค์",15.70,100.14],["ลพบุรี",14.80,100.65],["สระบุรี",14.53,100.91],
+  ["พระนครศรีอยุธยา",14.35,100.57],["สุพรรณบุรี",14.47,100.12],["นครปฐม",13.82,100.06],
+  ["ราชบุรี",13.53,99.82],["เพชรบุรี",13.11,99.94],["ประจวบคีรีขันธ์",11.81,99.80],
+  ["ชลบุรี",13.36,100.98],["ระยอง",12.68,101.28],["นครราชสีมา",14.98,102.10],
+  ["ขอนแก่น",16.44,102.84],["อุดรธานี",17.41,102.79],["อุบลราชธานี",15.24,104.85],
+  ["สุราษฎร์ธานี",9.14,99.33],["นครศรีธรรมราช",8.43,99.96],["สงขลา",7.01,100.47],["ภูเก็ต",7.88,98.39]
+];
+const ACT = ["ออกกำลังกายข้างนอก", "ใส่หน้ากากเมื่อออกนอกบ้าน", "เปิดหน้าต่างบ้าน"];
+const LV = [
+  { max: 15, tint: "#2bb6d9", name: "ดีมาก", head: "อากาศดีมาก ออกไปสูดลมหายใจได้เลย",
+    c: [[0,"ทำได้ตามปกติ"],[0,"ไม่จำเป็น"],[0,"เปิดได้เลย"]] },
+  { max: 25, tint: "#5cc46a", name: "ดี", head: "อากาศดี ทำกิจกรรมได้ตามปกติ",
+    c: [[0,"ทำได้ตามปกติ"],[0,"ไม่จำเป็น"],[0,"เปิดได้เลย"]] },
+  { max: 37.5, tint: "#f0c419", name: "ปานกลาง", head: "พอใช้ได้ แต่คนแพ้ง่ายควรระวัง",
+    c: [[1,"ได้ ถ้าไม่มีอาการ"],[1,"กลุ่มเสี่ยงควรใส่"],[0,"เปิดได้"]] },
+  { max: 75, tint: "#f08a24", name: "เริ่มมีผลต่อสุขภาพ", head: "เริ่มไม่ดีต่อสุขภาพ ควรลดเวลาอยู่กลางแจ้ง",
+    c: [[1,"ควรลดลง"],[1,"ควรใส่ N95"],[1,"เปิดเท่าที่จำเป็น"]] },
+  { max: Infinity, tint: "#e5484d", name: "มีผลต่อสุขภาพ", head: "ไม่ดีต่อสุขภาพ ควรอยู่ในอาคาร",
+    c: [[2,"งดข้างนอก"],[2,"ควรใส่ N95"],[2,"ปิดไว้ก่อน"]] }
+];
+const GLYPH = ["✓", "!", "✕"], WORD = ["ปลอดภัย", "ระวัง", "ไม่ควร"];
+const levelOf = v => LV.find(l => v <= l.max);
+const RANGE = ["0–15", "15–25", "25–37.5", "37.5–75", "มากกว่า 75"], SPAN = [15, 10, 12.5, 37.5, 25];
+
+const $ = id => document.getElementById(id);
+const p1 = $("p1"), p2 = $("p2");
+PROVINCES.forEach((p, i) => p1.add(new Option("จ." + p[0], i)));
+p2.add(new Option("เทียบกับ: ไม่เทียบ", -1));
+PROVINCES.forEach((p, i) => p2.add(new Option("เทียบกับ: " + p[0], i)));
+p1.value = 0; p2.value = 2;
+$("seg").innerHTML = LV.map((l, k) => `<i style="flex:${SPAN[k]};background:${l.tint}"></i>`).join("");
+$("chips").innerHTML = LV.map((l, k) => `<span class="chip" style="--c:${l.tint}"><i></i>${l.name} ${RANGE[k]}</span>`).join("");
+
+async function getAir(i) {
+  const [, lat, lon] = PROVINCES[i];
+  const r = await fetch("https://air-quality-api.open-meteo.com/v1/air-quality" +
+    `?latitude=${lat}&longitude=${lon}&current=pm2_5&hourly=pm2_5&past_days=7&forecast_days=2&timezone=Asia%2FBangkok`);
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const d = await r.json();
+  return { now: d.current.pm2_5, time: d.current.time, t: d.hourly.time, v: d.hourly.pm2_5 };
+}
+function demoAir(i) {
+  const base = [30,34,52,45,60,40,38,36,33,31,29,32,30,28,30,27,26,22,24,22,26,27,25,25,18,16,15,13][i] || 25;
+  const now = new Date(); now.setMinutes(0, 0, 0);
+  const pad = n => String(n).padStart(2, "0");
+  const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:00`;
+  const t = [], v = [];
+  for (let h = -168; h < 48; h++) {
+    t.push(iso(new Date(now.getTime() + h * 3600e3)));
+    v.push(Math.max(3, base * (1 + .35 * Math.sin((h + i * 7) / 24 * 6.283 - 1) + .25 * Math.sin(h / 61 + i))));
+  }
+  return { now: v[168], time: iso(now), t, v, demo: true };
+}
+async function safeAir(i) { try { return await getAir(i); } catch (e) { return demoAir(i); } }
+const nowIdx = a => Math.max(0, a.t.indexOf(a.time.slice(0, 13) + ":00"));
+function avg24(a) {
+  const end = nowIdx(a) + 1;
+  const vals = a.v.slice(Math.max(0, end - 24), end).filter(x => x != null);
+  return vals.length ? vals.reduce((s, x) => s + x, 0) / vals.length : a.now;
+}
+
+/* ฝุ่นลอย + ภูเขา */
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const cv = $("haze"), cx = cv.getContext("2d");
+let parts = [], W = 0, H = 0, looping = false;
+function resize() { W = cv.width = innerWidth; H = cv.height = innerHeight; }
+addEventListener("resize", resize); resize();
+function setParticles(n) {
+  while (parts.length < n) parts.push({ x: Math.random() * W, y: Math.random() * H, r: 2 + Math.random() * 7, s: .2 + Math.random() * .8, p: Math.random() * 6 });
+  parts.length = n;
+}
+function drawParts(t) {
+  cx.clearRect(0, 0, W, H);
+  for (const q of parts) {
+    if (!still) { q.x += q.s; q.y += Math.sin(t / 1800 + q.p) * .25; if (q.x > W + 10) q.x = -10; }
+    cx.beginPath(); cx.arc(q.x, q.y, q.r, 0, 6.283);
+    cx.fillStyle = `rgba(140,110,80,${.05 + q.r / 80})`; cx.fill();
+  }
+  if (!still) requestAnimationFrame(drawParts);
+}
+function setHaze(m) {
+  const hz = Math.min(1, m / 90);
+  [["h1", .95, 7], ["h2", .8, 3], ["h3", .5, 0]].forEach(([id, k, b]) => {
+    const e = $(id); e.style.opacity = 1 - hz * k; e.style.filter = `blur(${hz * b}px)`;
+  });
+  setParticles(Math.round(Math.min(450, m * 5 + 10)));
+  if (still) drawParts(0); else if (!looping) { looping = true; requestAnimationFrame(drawParts); }
+}
+function countUp(to) {
+  const from = +$("num").textContent || 0;
+  if (still) { $("num").textContent = to; return; }
+  const t0 = performance.now();
+  (function s(t) {
+    const k = Math.min(1, (t - t0) / 900);
+    $("num").textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)));
+    if (k < 1) requestAnimationFrame(s);
+  })(t0);
+}
+function cigs(m) {
+  const c = m / 22, full = Math.floor(Math.min(c, 8)), fr = c - full;
+  let h = ""; for (let k = 0; k < full; k++) h += '<i class="c"></i>';
+  if (c < 8 && fr > .05) h += `<i class="c" style="--w:${fr.toFixed(2)}"></i>`;
+  $("cig").innerHTML = h;
+  $("cigtxt").textContent = c < .05 ? "สูบบุหรี่ 0 มวน อากาศสะอาด"
+    : `สูบบุหรี่ประมาณ ${c.toFixed(1)} มวน` + (c > 8 ? " (แสดง 8 มวนแรก)" : "");
+}
+function bestHour(a) {
+  const s = nowIdx(a);
+  let bi = -1;
+  for (let k = s; k < Math.min(a.v.length, s + 24); k++) {
+    const hr = +a.t[k].slice(11, 13), v = a.v[k];
+    if (v != null && hr >= 5 && hr <= 21 && (bi < 0 || v < a.v[bi])) bi = k;
+  }
+  $("best").textContent = bi < 0 ? "" :
+    `ช่วงที่อากาศดีที่สุดใน 24 ชม. ข้างหน้า: ${a.t[bi].slice(11, 16)} น. (ประมาณ ${Math.round(a.v[bi])} µg/m³)`;
+}
+
+function drawChart(a, b, nameA, nameB) {
+  const W = 600, H = 240, L = 36, R = 10, T = 12, B = 26, n = a.v.length;
+  const all = a.v.concat(b ? b.v : []).filter(x => x != null);
+  const ymax = Math.max(80, Math.ceil(Math.max(...all) / 10) * 10);
+  const x = i => L + (i / (n - 1)) * (W - L - R), y = v => T + (1 - v / ymax) * (H - T - B);
+  const line = (arr, color) => {
+    let d = "", pen = false;
+    arr.forEach((v, i) => { if (v == null) { pen = false; return; }
+      d += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); pen = true; });
+    return `<path d="${d}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  };
+  let s = "";
+  [0, 25, 50, 75].filter(g => g <= ymax).forEach(g => {
+    s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" stroke="currentColor" opacity=".2"/>` +
+         `<text x="${L - 6}" y="${y(g) + 4}" font-size="12" text-anchor="end" fill="currentColor">${g}</text>`;
+  });
+  [37.5, 75].forEach(g => { if (g <= ymax)
+    s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" stroke="#e5484d" opacity=".5" stroke-dasharray="4 4"/>`; });
+  const ni = nowIdx(a);
+  s += `<line x1="${x(ni)}" x2="${x(ni)}" y1="${T}" y2="${H - B}" stroke="currentColor" opacity=".7"/>` +
+       `<text x="${x(ni) + 4}" y="${T + 11}" font-size="12" fill="currentColor">ตอนนี้</text>`;
+  for (let i = 0; i < n; i += 48) { const dt = new Date(a.t[i]);
+    s += `<text x="${x(i)}" y="${H - 8}" font-size="12" fill="currentColor">${dt.getDate()}/${dt.getMonth() + 1}</text>`; }
+  if (b) s += line(b.v, "#b05cff");
+  s += line(a.v, "var(--ink)");
+  $("chart").innerHTML = s;
+  $("legend").innerHTML = `<span><i style="background:var(--ink)"></i>${nameA}</span>` +
+    (b ? `<span><i style="background:#b05cff"></i>${nameB}</span>` : "") +
+    `<span><i style="background:#e5484d;opacity:.6"></i>เส้นเกณฑ์ 37.5 และ 75</span>`;
+}
+
+let share = "";
+async function update() {
+  const i = +p1.value, j = +p2.value, name = PROVINCES[i][0];
+  $("place").textContent = "จังหวัด" + name;
+  $("cmp").textContent = "";
+  document.querySelectorAll(".note").forEach(e => e.remove());
+  const [a, b] = await Promise.all([safeAir(i), j >= 0 ? safeAir(j) : null]);
+  const m = avg24(a), lv = levelOf(m), n = Math.round(a.now);
+  document.documentElement.style.setProperty("--tint", lv.tint);
+  $("mk").style.left = Math.min(95, Math.max(5, m)) + "%";
+  $("mkv").textContent = Math.round(m);
+  document.querySelectorAll(".chip").forEach((c, k) => c.classList.toggle("on", LV[k] === lv));
+  countUp(n); setHaze(m); cigs(m); bestHour(a);
+  $("badge").textContent = lv.name;
+  $("head").textContent = lv.head;
+  $("meta").textContent = `เฉลี่ย 24 ชม. ล่าสุด ${m.toFixed(1)} µg/m³ · อัปเดต ${a.time.replace("T", " ")} น.`;
+  $("checks").innerHTML = lv.c.map(([st, tx], k) =>
+    `<div class="chk s${st}"><i aria-hidden="true">${GLYPH[st]}</i><div>${ACT[k]}<small>${WORD[st]}: ${tx}</small></div></div>`).join("");
+  if (a.demo) {
+    const d = document.createElement("div"); d.className = "note";
+    d.textContent = "ตอนนี้แสดงข้อมูลตัวอย่าง เพราะเชื่อมต่อ API ไม่ได้ เมื่อเปิดผ่านเว็บจริงจะเป็นข้อมูลสด";
+    $("out").prepend(d);
+  }
+  drawChart(a, b, name, j >= 0 ? PROVINCES[j][0] : "");
+  if (b) { const d = m - avg24(b), o = PROVINCES[j][0];
+    $("cmp").textContent = Math.abs(d) < 1 ? `ค่าเฉลี่ย 24 ชม. ของ${name}กับ${o}ใกล้เคียงกัน`
+      : `ค่าเฉลี่ย 24 ชม. ของ${name}${d > 0 ? "สูงกว่า" : "ต่ำกว่า"}${o} ${Math.abs(d).toFixed(1)} µg/m³`; }
+  share = `ฝุ่น PM2.5 ที่${name}ตอนนี้ ${n} µg/m³ (${lv.name}) ≈ สูบบุหรี่ ${(m / 22).toFixed(1)} มวน/วัน ดูเลย: ${location.href}`;
+}
+function toast(t) { const e = $("toast"); e.textContent = t; e.classList.add("on"); setTimeout(() => e.classList.remove("on"), 2200); }
+$("sh").onclick = async () => {
+  try { if (navigator.share) await navigator.share({ text: share });
+        else { await navigator.clipboard.writeText(share); toast("คัดลอกข้อความแล้ว"); } } catch (e) {}
+};
+let fs = 0;
+$("fs").onclick = () => { fs = (fs + 1) % 3; document.documentElement.style.fontSize = [100, 118, 136][fs] + "%";
+  toast(["ตัวอักษรปกติ", "ตัวอักษรใหญ่", "ตัวอักษรใหญ่มาก"][fs]); };
+p1.addEventListener("change", update); p2.addEventListener("change", update);
+update();
+</script>
+</body>
+</html>
