@@ -43,6 +43,8 @@ main { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding
 .place { font-weight: 600; color: var(--muted); margin: 0; }
 .big { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 0; }
 .big b { font-size: clamp(5.5rem, 30vw, 9.5rem); line-height: 1; font-weight: 800; letter-spacing: -.04em; }
+.big b.fail { font-size: 3rem; letter-spacing: 0; color: var(--muted); }
+#fcnote { white-space: pre-line; }
 .big span { color: var(--muted); }
 .badge { display: inline-block; background: var(--tint); color: #111; font-weight: 800; padding: 4px 16px; border-radius: 999px; margin: 6px 0; }
 .head { font-size: 1.6rem; font-weight: 800; line-height: 1.3; margin: 6px 0 0; }
@@ -110,7 +112,7 @@ svg#chart { width: 100%; height: auto; display: block; color: var(--muted); }
 <main id="out" aria-live="polite">
   <section class="card">
     <p class="place" id="place">กำลังโหลด…</p>
-    <p class="big"><b id="num">–</b><span>µg/m³ (PM2.5)</span></p>
+    <p class="big"><b id="num" class="fail">–</b><span>µg/m³ (PM2.5)</span></p>
     <span class="badge" id="badge"></span>
     <p class="head" id="head"></p>
     <p class="meta" id="meta"></p>
@@ -339,6 +341,11 @@ function renderFc(name, d) {
       (sk != null && sk > 0 ? `แม่นกว่าการเดาแบบง่าย (เดาว่าเท่าตอนนี้) ${Math.round(sk * 100)}%` : "ยังไม่แม่นกว่าการเดาแบบง่าย (เดาว่าเท่าตอนนี้)") +
       " · ช่วงที่แสดงคือโอกาสราว 80%";
   }
+  const se = m && m.season;
+  if (se && se.mae != null) {
+    t += `\nช่วงฝุ่นหนัก ก.พ.–เม.ย. ที่ผ่านมา (โมเดลไม่เคยเห็นช่วงนี้ตอนเรียนรู้): คลาดเคลื่อนเฉลี่ย ${se.mae.toFixed(1)} µg/m³ ` +
+      (se.skill_vs_persistence != null && se.skill_vs_persistence > 0 ? `แม่นกว่าการเดาแบบง่าย ${Math.round(se.skill_vs_persistence * 100)}%` : "ยังไม่แม่นกว่าการเดาแบบง่าย");
+  }
   if (p.stale || (Date.now() - Date.parse(d.generated_at)) / 36e5 > 36) t += " · ข้อมูลพยากรณ์ค่อนข้างเก่า";
   $("fcnote").textContent = t;
   $("fc").hidden = false;
@@ -346,6 +353,7 @@ function renderFc(name, d) {
 
 function showFail() {
   $("num").textContent = "–";
+  $("num").classList.add("fail");
   $("badge").textContent = "ไม่มีข้อมูล";
   $("head").textContent = "ตอนนี้โหลดข้อมูลไม่ได้";
   $("meta").textContent = "ลองรีเฟรชหน้าหรือเปลี่ยนจังหวัดอีกครั้งในอีกสักครู่";
@@ -358,19 +366,22 @@ let seq = 0;
 let share = "";
 async function update() {
   const my = ++seq;
-  const i = +p1.value, j = +p2.value, name = PROVINCES[i][0];
+  const i = +p1.value, name = PROVINCES[i][0];
+  const j = +p2.value === i ? -1 : +p2.value;
   $("place").textContent = "จังหวัด" + name;
   $("cmp").textContent = "";
   document.querySelectorAll(".note").forEach(e => e.remove());
   const [a, b] = await Promise.all([safeAir(i), j >= 0 ? safeAir(j) : null]);
   if (my !== seq) return;
   if (!a) { showFail(); return; }
+  if (+p2.value === i) $("cmp").textContent = "เลือกจังหวัดอื่นในช่องเทียบ เพื่อดูความต่างบนกราฟ";
   if (j >= 0 && !b) $("cmp").textContent = "โหลดข้อมูลของจังหวัดที่เทียบไม่ได้ในตอนนี้";
   const m = avg24(a), lv = levelOf(m), n = Math.round(a.now);
   document.documentElement.style.setProperty("--tint", lv.tint);
   $("mk").style.left = Math.min(95, Math.max(5, m)) + "%";
   $("mkv").textContent = Math.round(m);
   document.querySelectorAll(".chip").forEach((c, k) => c.classList.toggle("on", LV[k] === lv));
+  $("num").classList.remove("fail");
   countUp(n); setHaze(m); cigs(m); bestHour(a);
   $("badge").textContent = lv.name;
   $("head").textContent = lv.head;
