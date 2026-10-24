@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-24T04:45:34+00:00",
+  "generated_at": "2026-10-24T11:29:47+00:00",
   "data_source": "Open-Meteo Air Quality API (CAMS model data)",
   "horizons": [
     3,
@@ -11,39 +11,39 @@
   "provinces": {
     "kanchanaburi": {
       "name": "กาญจนบุรี",
-      "origin_time": "2026-10-24T11:00",
-      "current_pm25": 2.7,
+      "origin_time": "2026-10-24T18:00",
+      "current_pm25": 7.4,
       "forecasts": [
         {
           "horizon_h": 3,
-          "target_time": "2026-10-24T14:00",
-          "pm25": 4.4,
-          "low": 2.3,
-          "high": 5.5,
+          "target_time": "2026-10-24T21:00",
+          "pm25": 9.5,
+          "low": 6.7,
+          "high": 12.0,
           "level": "ดีมาก"
         },
         {
           "horizon_h": 6,
-          "target_time": "2026-10-24T17:00",
-          "pm25": 6.4,
-          "low": 2.8,
-          "high": 10.0,
+          "target_time": "2026-10-25T00:00",
+          "pm25": 8.5,
+          "low": 5.8,
+          "high": 11.2,
           "level": "ดีมาก"
         },
         {
           "horizon_h": 12,
-          "target_time": "2026-10-24T23:00",
-          "pm25": 10.2,
-          "low": 5.6,
-          "high": 13.4,
+          "target_time": "2026-10-25T06:00",
+          "pm25": 6.8,
+          "low": 4.5,
+          "high": 10.7,
           "level": "ดีมาก"
         },
         {
           "horizon_h": 24,
-          "target_time": "2026-10-25T11:00",
-          "pm25": 9.8,
-          "low": 3.0,
-          "high": 14.9,
+          "target_time": "2026-10-25T18:00",
+          "pm25": 11.2,
+          "low": 5.0,
+          "high": 17.5,
           "level": "ดีมาก"
         }
       ],
@@ -64,7 +64,23 @@
           "baseline_climatology_mae": 3.553,
           "model": "hgb",
           "test_from": "2026-07-20 20:00",
-          "test_to": "2026-10-18 20:00"
+          "test_to": "2026-10-18 20:00",
+          "season": {
+            "n": 2136,
+            "mae": 4.394,
+            "rmse": 6.05,
+            "r2": 0.718,
+            "bias": -0.523,
+            "skill_vs_persistence": 0.282,
+            "level_accuracy": 0.688,
+            "alert_events": 551,
+            "alert_recall": 0.641,
+            "alert_precision": 0.772,
+            "baseline_persistence_mae": 6.117,
+            "mean_pm25": 30.516,
+            "from": "2026-02-01",
+            "to": "2026-04-30"
+          }
         },
         "6": {
           "n": 2161,
@@ -82,7 +98,23 @@
           "baseline_climatology_mae": 3.554,
           "model": "hgb",
           "test_from": "2026-07-20 17:00",
-          "test_to": "2026-10-18 17:00"
+          "test_to": "2026-10-18 17:00",
+          "season": {
+            "n": 2136,
+            "mae": 6.481,
+            "rmse": 8.462,
+            "r2": 0.444,
+            "bias": -1.233,
+            "skill_vs_persistence": 0.329,
+            "level_accuracy": 0.528,
+            "alert_events": 550,
+            "alert_recall": 0.34,
+            "alert_precision": 0.634,
+            "baseline_persistence_mae": 9.656,
+            "mean_pm25": 30.49,
+            "from": "2026-02-01",
+            "to": "2026-04-30"
+          }
         },
         "12": {
           "n": 2161,
@@ -100,7 +132,23 @@
           "baseline_climatology_mae": 3.555,
           "model": "hgb",
           "test_from": "2026-07-20 11:00",
-          "test_to": "2026-10-18 11:00"
+          "test_to": "2026-10-18 11:00",
+          "season": {
+            "n": 2136,
+            "mae": 7.208,
+            "rmse": 9.463,
+            "r2": 0.3,
+            "bias": -1.922,
+            "skill_vs_persistence": 0.433,
+            "level_accuracy": 0.471,
+            "alert_events": 547,
+            "alert_recall": 0.192,
+            "alert_precision": 0.603,
+            "baseline_persistence_mae": 12.704,
+            "mean_pm25": 30.452,
+            "from": "2026-02-01",
+            "to": "2026-04-30"
+          }
         },
         "24": {
           "n": 2161,
@@ -118,7 +166,23 @@
           "baseline_climatology_mae": 3.558,
           "model": "hgb",
           "test_from": "2026-07-19 23:00",
-          "test_to": "2026-10-17 23:00"
+          "test_to": "2026-10-17 23:00",
+          "season": {
+            "n": 2136,
+            "mae": 7.021,
+            "rmse": 9.083,
+            "r2": 0.355,
+            "bias": -1.252,
+            "skill_vs_persistence": 0.053,
+            "level_accuracy": 0.505,
+            "alert_events": 546,
+            "alert_recall": 0.344,
+            "alert_precision": 0.662,
+            "baseline_persistence_mae": 7.412,
+            "mean_pm25": 30.44,
+            "from": "2026-02-01",
+            "to": "2026-04-30"
+          }
         }
       },
       "models": {
@@ -130,39 +194,39 @@
     },
     "chiangmai": {
       "name": "เชียงใหม่",
-      "origin_time": "2026-10-24T12:00",
-      "current_pm25": 7.7,
+      "origin_time": "2026-10-24T18:00",
+      "current_pm25": 10.0,
       "forecasts": [
         {
           "horizon_h": 3,
-          "target_time": "2026-10-24T15:00",
-          "pm25": 9.6,
-          "low": 7.5,
-          "high": 10.3,
-          "level": "ดีมาก"
+          "target_time": "2026-10-24T21:00",
+          "pm25": 23.0,
+          "low": 14.2,
+          "high": 32.1,
+          "level": "ดี"
         },
         {
           "horizon_h": 6,
-          "target_time": "2026-10-24T18:00",
-          "pm25": 17.8,
-          "low": 8.8,
-          "high": 19.8,
+          "target_time": "2026-10-25T00:00",
+          "pm25": 20.2,
+          "low": 13.5,
+          "high": 31.6,
           "level": "ดี"
         },
         {
           "horizon_h": 12,
-          "target_time": "2026-10-25T00:00",
-          "pm25": 22.5,
-          "low": 13.8,
-          "high": 27.0,
+          "target_time": "2026-10-25T06:00",
+          "pm25": 16.5,
+          "low": 10.1,
+          "high": 22.0,
           "level": "ดี"
         },
         {
           "horizon_h": 24,
-          "target_time": "2026-10-25T12:00",
-          "pm25": 10.6,
-          "low": 5.8,
-          "high": 11.1,
+          "target_time": "2026-10-25T18:00",
+          "pm25": 14.1,
+          "low": 8.5,
+          "high": 15.3,
           "level": "ดีมาก"
         }
       ],
@@ -183,7 +247,23 @@
           "baseline_climatology_mae": 4.93,
           "model": "hgb",
           "test_from": "2026-07-20 20:00",
-          "test_to": "2026-10-18 20:00"
+          "test_to": "2026-10-18 20:00",
+          "season": {
+            "n": 2136,
+            "mae": 6.202,
+            "rmse": 9.472,
+            "r2": 0.777,
+            "bias": -1.816,
+            "skill_vs_persistence": 0.296,
+            "level_accuracy": 0.737,
+            "alert_events": 1091,
+            "alert_recall": 0.903,
+            "alert_precision": 0.879,
+            "baseline_persistence_mae": 8.809,
+            "mean_pm25": 41.028,
+            "from": "2026-02-01",
+            "to": "2026-04-30"
+          }
         },
         "6": {
           "n": 2161,
@@ -201,7 +281,23 @@
           "baseline_climatology_mae": 4.931,
           "model": "ridge",
           "test_from": "2026-07-20 17:00",
-          "test_to": "2026-10-18 17:00"
+          "test_to": "2026-10-18 17:00",
+          "season": {
+            "n": 2136,
+            "mae": 8.693,
+            "rmse": 11.835,
+            "r2": 0.652,
+            "bias": -1.639,
+            "skill_vs_persistence": 0.379,
+            "level_accuracy": 0.603,
+            "alert_events": 1091,
+            "alert_recall": 0.793,
+            "alert_precision": 0.829,
+            "baseline_persistence_mae": 13.992,
+            "mean_pm25": 41.035,
+            "from": "2026-02-01",
+            "to": "2026-04-30"
+          }
         },
         "12": {
           "n": 2161,
@@ -219,7 +315,23 @@
           "baseline_climatology_mae": 4.931,
           "model": "ridge",
           "test_from": "2026-07-20 11:00",
-          "test_to": "2026-10-18 11:00"
+          "test_to": "2026-10-18 11:00",
+          "season": {
+            "n": 2136,
+            "mae": 9.525,
+            "rmse": 13.16,
+            "r2": 0.57,
+            "bias": -2.382,
+            "skill_vs_persistence": 0.478,
+            "level_accuracy": 0.586,
+            "alert_events": 1090,
+            "alert_recall": 0.763,
+            "alert_precision": 0.824,
+            "baseline_persistence_mae": 18.234,
+            "mean_pm25": 41.033,
+            "from": "2026-02-01",
+            "to": "2026-04-30"
+          }
         },
         "24": {
           "n": 2161,
@@ -237,7 +349,23 @@
           "baseline_climatology_mae": 4.934,
           "model": "ridge",
           "test_from": "2026-07-19 23:00",
-          "test_to": "2026-10-17 23:00"
+          "test_to": "2026-10-17 23:00",
+          "season": {
+            "n": 2136,
+            "mae": 10.124,
+            "rmse": 14.225,
+            "r2": 0.498,
+            "bias": -2.733,
+            "skill_vs_persistence": 0.107,
+            "level_accuracy": 0.564,
+            "alert_events": 1086,
+            "alert_recall": 0.734,
+            "alert_precision": 0.796,
+            "baseline_persistence_mae": 11.342,
+            "mean_pm25": 40.982,
+            "from": "2026-02-01",
+            "to": "2026-04-30"
+          }
         }
       },
       "models": {
@@ -249,40 +377,40 @@
     },
     "bangkok": {
       "name": "กรุงเทพฯ",
-      "origin_time": "2026-10-24T12:00",
-      "current_pm25": 9.5,
+      "origin_time": "2026-10-24T18:00",
+      "current_pm25": 13.6,
       "forecasts": [
         {
           "horizon_h": 3,
-          "target_time": "2026-10-24T15:00",
-          "pm25": 14.2,
-          "low": 10.3,
-          "high": 17.9,
-          "level": "ดีมาก"
-        },
-        {
-          "horizon_h": 6,
-          "target_time": "2026-10-24T18:00",
-          "pm25": 20.5,
-          "low": 11.7,
-          "high": 27.6,
+          "target_time": "2026-10-24T21:00",
+          "pm25": 16.9,
+          "low": 10.6,
+          "high": 24.0,
           "level": "ดี"
         },
         {
-          "horizon_h": 12,
+          "horizon_h": 6,
           "target_time": "2026-10-25T00:00",
-          "pm25": 13.1,
-          "low": 13.0,
-          "high": 34.0,
+          "pm25": 13.4,
+          "low": 9.3,
+          "high": 21.1,
+          "level": "ดีมาก"
+        },
+        {
+          "horizon_h": 12,
+          "target_time": "2026-10-25T06:00",
+          "pm25": 5.3,
+          "low": 5.3,
+          "high": 19.7,
           "level": "ดีมาก"
         },
         {
           "horizon_h": 24,
-          "target_time": "2026-10-25T12:00",
-          "pm25": 25.8,
-          "low": 11.6,
-          "high": 31.1,
-          "level": "ปานกลาง"
+          "target_time": "2026-10-25T18:00",
+          "pm25": 19.1,
+          "low": 11.8,
+          "high": 27.6,
+          "level": "ดี"
         }
       ],
       "metrics": {
@@ -302,7 +430,23 @@
           "baseline_climatology_mae": 9.727,
           "model": "hgb",
           "test_from": "2026-07-20 20:00",
-          "test_to": "2026-10-18 20:00"
+          "test_to": "2026-10-18 20:00",
+          "season": {
+            "n": 2136,
+            "mae": 4.492,
+            "rmse": 6.588,
+            "r2": 0.741,
+            "bias": 0.638,
+            "skill_vs_persistence": 0.14,
+            "level_accuracy": 0.683,
+            "alert_events": 327,
+            "alert_recall": 0.798,
+            "alert_precision": 0.733,
+            "baseline_persistence_mae": 5.225,
+            "mean_pm25": 25.514,
+            "from": "2026-02-01",
+            "to": "2026-04-30"
+          }
         },
         "6": {
           "n": 2161,
@@ -320,7 +464,23 @@
           "baseline_climatology_mae": 9.728,
           "model": "hgb",
           "test_from": "2026-07-20 17:00",
-          "test_to": "2026-10-18 17:00"
+          "test_to": "2026-10-18 17:00",
+          "season": {
+            "n": 2136,
+            "mae": 7.132,
+            "rmse": 10.061,
+            "r2": 0.396,
+            "bias": 1.369,
+            "skill_vs_persistence": 0.157,
+            "level_accuracy": 0.531,
+            "alert_events": 324,
+            "alert_recall": 0.667,
+            "alert_precision": 0.568,
+            "baseline_persistence_mae": 8.46,
+            "mean_pm25": 25.505,
+            "from": "2026-02-01",
+            "to": "2026-04-30"
+          }
         },
         "12": {
           "n": 2161,
@@ -338,7 +498,23 @@
           "baseline_climatology_mae": 9.73,
           "model": "ridge",
           "test_from": "2026-07-20 11:00",
-          "test_to": "2026-10-18 11:00"
+          "test_to": "2026-10-18 11:00",
+          "season": {
+            "n": 2136,
+            "mae": 8.139,
+            "rmse": 11.269,
+            "r2": 0.241,
+            "bias": 0.034,
+            "skill_vs_persistence": 0.236,
+            "level_accuracy": 0.48,
+            "alert_events": 322,
+            "alert_recall": 0.435,
+            "alert_precision": 0.458,
+            "baseline_persistence_mae": 10.652,
+            "mean_pm25": 25.493,
+            "from": "2026-02-01",
+            "to": "2026-04-30"
+          }
         },
         "24": {
           "n": 2161,
@@ -356,7 +532,23 @@
           "baseline_climatology_mae": 9.737,
           "model": "hgb",
           "test_from": "2026-07-19 23:00",
-          "test_to": "2026-10-17 23:00"
+          "test_to": "2026-10-17 23:00",
+          "season": {
+            "n": 2136,
+            "mae": 8.486,
+            "rmse": 11.601,
+            "r2": 0.197,
+            "bias": 1.34,
+            "skill_vs_persistence": 0.032,
+            "level_accuracy": 0.45,
+            "alert_events": 318,
+            "alert_recall": 0.311,
+            "alert_precision": 0.412,
+            "baseline_persistence_mae": 8.763,
+            "mean_pm25": 25.418,
+            "from": "2026-02-01",
+            "to": "2026-04-30"
+          }
         }
       },
       "models": {
