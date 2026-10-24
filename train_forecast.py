@@ -369,6 +369,24 @@ def run_province(key: str, cfg: dict, src, test_days: int, val_days: int) -> dic
         res["model"], res["val_mae"] = kind, val_mae
         res["test_from"] = str(Xt.index.min())[:16]
         res["test_to"] = str(Xt.index.max())[:16]
+        # 2b) hard mode: train ONLY on data before the last Feb-Apr haze season, test on it
+        s0, s1 = last_season(now_local())
+        tr_m = X.index < s0 - pd.Timedelta(hours=48)
+        se_m = (X.index >= s0) & (X.index <= s1)
+        res["season"] = None
+        if tr_m.sum() >= MIN_TRAIN_ROWS and se_m.sum() >= MIN_TEST_ROWS:
+            ms = fit_point(kind, X[tr_m], y[tr_m])
+            Xs, ys = X[se_m], y[se_m].values
+            sres = evaluate(ys, predict(ms, Xs), Xs["pm_lag0"].values)
+            sres["baseline_persistence_mae"] = float(np.mean(np.abs(Xs["pm_lag0"].values - ys)))
+            sres["mean_pm25"] = float(ys.mean())
+            sres["from"], sres["to"] = str(s0)[:10], str(s1)[:10]
+            res["season"] = round_dict(sres)
+            LOG.info("%s +%2dh haze season %s..%s: MAE %.2f | persistence %.2f | skill %+.0f%% | mean PM2.5 %.1f",
+                     key, h, sres["from"], sres["to"], sres["mae"], sres["baseline_persistence_mae"],
+                     100 * (sres["skill_vs_persistence"] or 0), sres["mean_pm25"])
+        else:
+            LOG.warning("%s +%dh: not enough data for haze-season test", key, h)
         metrics[h] = res
         LOG.info("%s +%2dh [%s] test MAE %.2f | persistence %.2f | climatology %.2f | skill %+.0f%% | 80%% cover %.0f%%",
                  key, h, kind, res["mae"], res["baseline_persistence_mae"], res["baseline_climatology_mae"],
@@ -400,6 +418,12 @@ def run_province(key: str, cfg: dict, src, test_days: int, val_days: int) -> dic
             "current_pm25": clean_num(rec.loc[origin, "pm2_5"], 1), "forecasts": forecasts,
             "metrics": {str(h): round_dict({k: v for k, v in metrics[h].items() if k != "val_mae"}) for h in HORIZONS},
             "models": {str(h): chosen[h] for h in HORIZONS}}
+
+
+def last_season(today: pd.Timestamp) -> tuple[pd.Timestamp, pd.Timestamp]:
+    """Most recent completed haze season (Feb 1 - Apr 30)."""
+    year = today.year if today.month >= 5 else today.year - 1
+    return pd.Timestamp(year, 2, 1), pd.Timestamp(year, 4, 30, 23)
 
 
 def write_json_atomic(path: Path, obj: dict) -> None:
@@ -471,6 +495,7 @@ def check_selftest(path: Path) -> None:
         for h in HORIZONS:
             m = p["metrics"][str(h)]
             assert m["mae"] is not None and m["n"] >= MIN_TEST_ROWS, m
+            assert "season" in m, m
     LOG.info("SELFTEST PASSED")
 
 
