@@ -74,6 +74,10 @@ svg#chart { width: 100%; height: auto; display: block; color: var(--muted); }
 .chip { display: flex; align-items: center; gap: 6px; font-size: .9rem; line-height: 1.4; padding: 4px 12px; border-radius: 999px; border: 1.5px solid var(--edge); }
 .chip i { width: 12px; height: 12px; border-radius: 50%; background: var(--c); flex: none; }
 .chip.on { border-color: var(--ink); font-weight: 700; background: var(--panel); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.tile { border-radius: 18px; padding: 12px; border: 1px solid var(--edge); border-top: 6px solid var(--c); display: grid; gap: 2px; }
+.tile b { font-family: var(--head); font-size: 2.2rem; line-height: 1.1; }
+.tile small { color: var(--muted); font-size: .85rem; line-height: 1.3; }
 .more { color: var(--muted); font-size: .95rem; }
 .more summary { cursor: pointer; font-weight: 600; color: var(--ink); min-height: 32px; }
 .more p { margin: 8px 0 0; }
@@ -119,6 +123,12 @@ svg#chart { width: 100%; height: auto; display: block; color: var(--muted); }
     <p class="sub" id="best" style="margin-top:12px"></p>
   </section>
 
+  <section class="card" id="fc" hidden>
+    <h2>พยากรณ์ล่วงหน้าจากโมเดลของเรา</h2>
+    <div class="tiles" id="tiles"></div>
+    <p class="sub" id="fcnote"></p>
+  </section>
+
   <section class="card">
     <div class="row">
       <h2 style="margin:0;margin-right:auto">ย้อนหลัง 7 วัน และคาดการณ์ 2 วัน</h2>
@@ -138,6 +148,7 @@ svg#chart { width: 100%; height: auto; display: block; color: var(--muted); }
   <details class="card more">
     <summary>ที่มาของข้อมูลและข้อจำกัด</summary>
     <p>ข้อมูลจาก Open-Meteo Air Quality API เป็นค่าจากแบบจำลองคอมพิวเตอร์ ไม่ใช่เครื่องวัดจริง จึงอาจต่างจากสถานีของกรมควบคุมมลพิษ</p>
+    <p>พยากรณ์ล่วงหน้าเรียนรู้จากข้อมูลชุดเดียวกัน (ไม่ใช่เครื่องวัดจริง) จึงบอกได้เฉพาะแนวโน้มของข้อมูลชุดนี้ และมีให้เฉพาะบางจังหวัด</p>
     <p>การเทียบเป็นมวนบุหรี่เป็นการประมาณของ Berkeley Earth (22 µg/m³ ≈ 1 มวนต่อวัน) ไม่ใช่คำแนะนำทางการแพทย์</p>
   </details>
 </main>
@@ -296,6 +307,27 @@ function drawChart(a, b, nameA, nameB) {
     `<span><i style="background:#e5484d;opacity:.6"></i>เส้นเกณฑ์ 37.5 และ 75</span>`;
 }
 
+const fcReady = fetch("forecast.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).catch(() => null);
+function renderFc(name, d) {
+  const p = d && d.provinces && Object.values(d.provinces).find(x => x.name === name);
+  if (!p) { $("fc").hidden = true; return; }
+  $("tiles").innerHTML = p.forecasts.map(f => {
+    const lv = LV.find(l => l.name === f.level) || LV[0];
+    return `<div class="tile" style="--c:${lv.tint}"><small>อีก ${f.horizon_h} ชม. (${f.target_time.slice(11, 16)} น.)</small>` +
+      `<b>${Math.round(f.pm25)}</b><span>${f.level}</span><small>ช่วงที่น่าจะเป็น ${Math.round(f.low)}–${Math.round(f.high)}</small></div>`;
+  }).join("");
+  const m = p.metrics && p.metrics["24"], sk = m && m.skill_vs_persistence;
+  let t = "";
+  if (m && m.mae != null) {
+    t = `ทดสอบกับข้อมูล ${d.test_days} วันล่าสุดที่โมเดลไม่เคยเห็น: พยากรณ์ล่วงหน้า 24 ชม. คลาดเคลื่อนเฉลี่ย ${m.mae.toFixed(1)} µg/m³ ` +
+      (sk != null && sk > 0 ? `ดีกว่าการเดาว่า “เท่าตอนนี้” ${Math.round(sk * 100)}%` : "ยังไม่ดีกว่าการเดาว่า “เท่าตอนนี้”") +
+      " · ช่วงที่แสดงคือโอกาสราว 80%";
+  }
+  if (p.stale || (Date.now() - Date.parse(d.generated_at)) / 36e5 > 36) t += " · ข้อมูลพยากรณ์ค่อนข้างเก่า";
+  $("fcnote").textContent = t;
+  $("fc").hidden = false;
+}
+
 let share = "";
 async function update() {
   const i = +p1.value, j = +p2.value, name = PROVINCES[i][0];
@@ -319,6 +351,7 @@ async function update() {
     d.textContent = "ตอนนี้แสดงข้อมูลตัวอย่าง เพราะเชื่อมต่อ API ไม่ได้ เมื่อเปิดผ่านเว็บจริงจะเป็นข้อมูลสด";
     $("out").prepend(d);
   }
+  renderFc(name, await fcReady);
   drawChart(a, b, name, j >= 0 ? PROVINCES[j][0] : "");
   if (b) { const d = m - avg24(b), o = PROVINCES[j][0];
     $("cmp").textContent = Math.abs(d) < 1 ? `ค่าเฉลี่ย 24 ชม. ของ${name}กับ${o}ใกล้เคียงกัน`
