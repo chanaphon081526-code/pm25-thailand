@@ -89,6 +89,14 @@ svg#chart { width: 100%; height: auto; display: block; color: var(--muted); }
 .help { margin-top: 8px; font-size: .95rem; color: var(--muted); }
 .help summary { cursor: pointer; font-weight: 600; color: var(--ink); min-height: 32px; }
 .help p { margin: 6px 0 0; }
+.bar .logo { white-space: nowrap; flex: none; margin-right: 0; }
+.bar select { flex: 1 1 0; min-width: 0; max-width: 220px; margin-left: auto; }
+.ng { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; margin-bottom: 8px; }
+.nc { display: flex; justify-content: space-between; align-items: center; gap: 6px; min-height: 46px; padding: 6px 10px; text-align: left; font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--edge); border-top: 5px solid var(--c); border-radius: 12px; cursor: pointer; }
+.nc b { font-weight: 600; font-size: .88rem; line-height: 1.3; }
+.nc span { font-family: var(--head); font-weight: 800; }
+.rg { font-size: .95rem; color: var(--muted); margin: 14px 0 6px; font-weight: 600; }
+.top5 { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
 .more { color: var(--muted); font-size: .95rem; }
 .more summary { cursor: pointer; font-weight: 600; color: var(--ink); min-height: 32px; }
 .more p { margin: 8px 0 0; }
@@ -160,6 +168,13 @@ svg#chart { width: 100%; height: auto; display: block; color: var(--muted); }
     <p class="sub" id="cmp"></p>
   </section>
 
+  <section class="card" id="nation" hidden>
+    <h2>ภาพรวมทั้งประเทศตอนนี้</h2>
+    <p class="sub">แตะจังหวัดเพื่อดูรายละเอียด · ค่า PM2.5 ตอนนี้ (µg/m³)</p>
+    <div id="top5"></div><div id="ngrid"></div>
+    <p class="sub" style="font-size:.85rem;margin-top:10px">ข้อมูลมีความละเอียดราว 45 กม. จังหวัดที่อยู่ใกล้กันจึงอาจได้ค่าใกล้เคียงหรือเท่ากัน</p>
+  </section>
+
   <section class="card">
     <h2>ค่าเฉลี่ย 24 ชม. อยู่ตรงไหนของสเกล</h2>
     <div class="scale"><div class="seg" id="seg"></div><div class="mk" id="mk"><b id="mkv"></b></div></div>
@@ -179,16 +194,85 @@ svg#chart { width: 100%; height: auto; display: block; color: var(--muted); }
 
 <script>
 const PROVINCES = [
-  ["กาญจนบุรี",14.02,99.53],["กรุงเทพฯ",13.76,100.50],["เชียงใหม่",18.79,98.98],
-  ["เชียงราย",19.91,99.83],["แม่ฮ่องสอน",19.30,97.97],["ลำปาง",18.29,99.49],
-  ["น่าน",18.78,100.78],["ตาก",16.88,99.13],["พิษณุโลก",16.82,100.26],
-  ["นครสวรรค์",15.70,100.14],["ลพบุรี",14.80,100.65],["สระบุรี",14.53,100.91],
-  ["พระนครศรีอยุธยา",14.35,100.57],["สุพรรณบุรี",14.47,100.12],["นครปฐม",13.82,100.06],
-  ["ราชบุรี",13.53,99.82],["เพชรบุรี",13.11,99.94],["ประจวบคีรีขันธ์",11.81,99.80],
-  ["ชลบุรี",13.36,100.98],["ระยอง",12.68,101.28],["นครราชสีมา",14.98,102.10],
-  ["ขอนแก่น",16.44,102.84],["อุดรธานี",17.41,102.79],["อุบลราชธานี",15.24,104.85],
-  ["สุราษฎร์ธานี",9.14,99.33],["นครศรีธรรมราช",8.43,99.96],["สงขลา",7.01,100.47],["ภูเก็ต",7.88,98.39]
+  ["เชียงใหม่",18.79,98.98,"ภาคเหนือ"],
+  ["เชียงราย",19.91,99.83,"ภาคเหนือ"],
+  ["ลำพูน",18.57,99.01,"ภาคเหนือ"],
+  ["ลำปาง",18.29,99.49,"ภาคเหนือ"],
+  ["แพร่",18.14,100.14,"ภาคเหนือ"],
+  ["น่าน",18.78,100.78,"ภาคเหนือ"],
+  ["พะเยา",19.17,99.9,"ภาคเหนือ"],
+  ["แม่ฮ่องสอน",19.3,97.97,"ภาคเหนือ"],
+  ["อุตรดิตถ์",17.63,100.1,"ภาคเหนือ"],
+  ["กรุงเทพฯ",13.76,100.5,"ภาคกลาง"],
+  ["กำแพงเพชร",16.48,99.52,"ภาคกลาง"],
+  ["ชัยนาท",15.19,100.13,"ภาคกลาง"],
+  ["นครนายก",14.21,101.21,"ภาคกลาง"],
+  ["นครปฐม",13.82,100.06,"ภาคกลาง"],
+  ["นครสวรรค์",15.7,100.14,"ภาคกลาง"],
+  ["นนทบุรี",13.86,100.51,"ภาคกลาง"],
+  ["ปทุมธานี",14.02,100.53,"ภาคกลาง"],
+  ["พระนครศรีอยุธยา",14.35,100.57,"ภาคกลาง"],
+  ["พิจิตร",16.44,100.35,"ภาคกลาง"],
+  ["พิษณุโลก",16.82,100.26,"ภาคกลาง"],
+  ["เพชรบูรณ์",16.42,101.16,"ภาคกลาง"],
+  ["ลพบุรี",14.8,100.65,"ภาคกลาง"],
+  ["สมุทรปราการ",13.6,100.6,"ภาคกลาง"],
+  ["สมุทรสงคราม",13.41,100.0,"ภาคกลาง"],
+  ["สมุทรสาคร",13.55,100.27,"ภาคกลาง"],
+  ["สิงห์บุรี",14.89,100.4,"ภาคกลาง"],
+  ["สุโขทัย",17.01,99.82,"ภาคกลาง"],
+  ["สุพรรณบุรี",14.47,100.12,"ภาคกลาง"],
+  ["สระบุรี",14.53,100.91,"ภาคกลาง"],
+  ["อ่างทอง",14.59,100.46,"ภาคกลาง"],
+  ["อุทัยธานี",15.38,100.02,"ภาคกลาง"],
+  ["จันทบุรี",12.61,102.1,"ภาคตะวันออก"],
+  ["ฉะเชิงเทรา",13.69,101.07,"ภาคตะวันออก"],
+  ["ชลบุรี",13.36,100.98,"ภาคตะวันออก"],
+  ["ตราด",12.24,102.52,"ภาคตะวันออก"],
+  ["ปราจีนบุรี",14.05,101.37,"ภาคตะวันออก"],
+  ["ระยอง",12.68,101.28,"ภาคตะวันออก"],
+  ["สระแก้ว",13.82,102.07,"ภาคตะวันออก"],
+  ["กาญจนบุรี",14.02,99.53,"ภาคตะวันตก"],
+  ["ตาก",16.88,99.13,"ภาคตะวันตก"],
+  ["ประจวบคีรีขันธ์",11.81,99.8,"ภาคตะวันตก"],
+  ["เพชรบุรี",13.11,99.94,"ภาคตะวันตก"],
+  ["ราชบุรี",13.53,99.82,"ภาคตะวันตก"],
+  ["กาฬสินธุ์",16.43,103.51,"ภาคตะวันออกเฉียงเหนือ"],
+  ["ขอนแก่น",16.44,102.84,"ภาคตะวันออกเฉียงเหนือ"],
+  ["ชัยภูมิ",15.81,102.03,"ภาคตะวันออกเฉียงเหนือ"],
+  ["นครพนม",17.41,104.78,"ภาคตะวันออกเฉียงเหนือ"],
+  ["นครราชสีมา",14.98,102.1,"ภาคตะวันออกเฉียงเหนือ"],
+  ["บึงกาฬ",18.36,103.65,"ภาคตะวันออกเฉียงเหนือ"],
+  ["บุรีรัมย์",14.99,103.1,"ภาคตะวันออกเฉียงเหนือ"],
+  ["มหาสารคาม",16.18,103.3,"ภาคตะวันออกเฉียงเหนือ"],
+  ["มุกดาหาร",16.54,104.72,"ภาคตะวันออกเฉียงเหนือ"],
+  ["ยโสธร",15.79,104.15,"ภาคตะวันออกเฉียงเหนือ"],
+  ["ร้อยเอ็ด",16.05,103.65,"ภาคตะวันออกเฉียงเหนือ"],
+  ["เลย",17.49,101.72,"ภาคตะวันออกเฉียงเหนือ"],
+  ["สกลนคร",17.16,104.15,"ภาคตะวันออกเฉียงเหนือ"],
+  ["สุรินทร์",14.88,103.49,"ภาคตะวันออกเฉียงเหนือ"],
+  ["ศรีสะเกษ",15.12,104.32,"ภาคตะวันออกเฉียงเหนือ"],
+  ["หนองคาย",17.88,102.74,"ภาคตะวันออกเฉียงเหนือ"],
+  ["หนองบัวลำภู",17.2,102.44,"ภาคตะวันออกเฉียงเหนือ"],
+  ["อุดรธานี",17.41,102.79,"ภาคตะวันออกเฉียงเหนือ"],
+  ["อุบลราชธานี",15.24,104.85,"ภาคตะวันออกเฉียงเหนือ"],
+  ["อำนาจเจริญ",15.86,104.63,"ภาคตะวันออกเฉียงเหนือ"],
+  ["กระบี่",8.09,98.91,"ภาคใต้"],
+  ["ชุมพร",10.49,99.18,"ภาคใต้"],
+  ["ตรัง",7.56,99.61,"ภาคใต้"],
+  ["นครศรีธรรมราช",8.43,99.96,"ภาคใต้"],
+  ["นราธิวาส",6.43,101.82,"ภาคใต้"],
+  ["ปัตตานี",6.87,101.25,"ภาคใต้"],
+  ["พังงา",8.45,98.53,"ภาคใต้"],
+  ["พัทลุง",7.62,100.08,"ภาคใต้"],
+  ["ภูเก็ต",7.88,98.39,"ภาคใต้"],
+  ["ระนอง",9.96,98.64,"ภาคใต้"],
+  ["สงขลา",7.01,100.47,"ภาคใต้"],
+  ["สตูล",6.62,100.07,"ภาคใต้"],
+  ["สุราษฎร์ธานี",9.14,99.33,"ภาคใต้"],
+  ["ยะลา",6.54,101.28,"ภาคใต้"]
 ];
+const REGIONS = ["ภาคเหนือ", "ภาคกลาง", "ภาคตะวันออก", "ภาคตะวันตก", "ภาคตะวันออกเฉียงเหนือ", "ภาคใต้"];
 const ACT = ["ออกกำลังกายข้างนอก", "ใส่หน้ากากเมื่อออกนอกบ้าน", "เปิดหน้าต่างบ้าน"];
 const LV = [
   { max: 15, tint: "#2bb6d9", name: "ดีมาก", head: "อากาศดีมาก ออกไปสูดลมหายใจได้เลย",
@@ -208,10 +292,18 @@ const RANGE = ["0–15", "15–25", "25–37.5", "37.5–75", "มากกว�
 
 const $ = id => document.getElementById(id);
 const p1 = $("p1"), p2 = $("p2");
-PROVINCES.forEach((p, i) => p1.add(new Option("จ." + p[0], i)));
+function fillSel(sel, prefix) {
+  REGIONS.forEach(r => {
+    const g = document.createElement("optgroup"); g.label = r;
+    PROVINCES.forEach((p, i) => { if (p[3] === r) g.appendChild(new Option(prefix + p[0], i)); });
+    sel.appendChild(g);
+  });
+}
+fillSel(p1, "จ.");
 p2.add(new Option("เทียบกับ: ไม่เทียบ", -1));
-PROVINCES.forEach((p, i) => p2.add(new Option("เทียบกับ: " + p[0], i)));
-p1.value = 0; p2.value = 2;
+fillSel(p2, "เทียบกับ: ");
+p1.value = PROVINCES.findIndex(p => p[0] === "กาญจนบุรี");
+p2.value = PROVINCES.findIndex(p => p[0] === "เชียงใหม่");
 $("seg").innerHTML = LV.map((l, k) => `<i style="flex:${SPAN[k]};background:${l.tint}"></i>`).join("");
 $("chips").innerHTML = LV.map((l, k) => `<span class="chip" style="--c:${l.tint}"><i></i>${l.name} ${RANGE[k]}</span>`).join("");
 
@@ -336,7 +428,13 @@ function drawChart(a, b, nameA, nameB) {
 const fcReady = fetch("forecast.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).catch(() => null);
 function renderFc(name, d) {
   const p = d && d.provinces && Object.values(d.provinces).find(x => x.name === name);
-  if (!p) { $("fc").hidden = true; return; }
+  document.querySelectorAll("#fc .help").forEach(e => e.hidden = !p);
+  if (!p) {
+    const have = d && d.provinces ? Object.values(d.provinces).map(x => x.name).join(" ") : "";
+    $("tiles").innerHTML = "";
+    $("fcnote").textContent = "จังหวัดนี้ยังไม่มีโมเดลพยากรณ์ล่วงหน้า" + (have ? " (ตอนนี้มี: " + have + ")" : "") + " ค่าที่แสดงด้านบนและกราฟเป็นข้อมูลปัจจุบันและย้อนหลังจาก Open-Meteo";
+    $("fc").hidden = false; return;
+  }
   $("tiles").innerHTML = p.forecasts.map(f => {
     const lv = LV.find(l => l.name === f.level) || LV[0];
     return `<div class="tile" style="--c:${lv.tint}"><small>อีก ${f.horizon_h} ชม. (${f.target_time.slice(11, 16)} น.)</small>` +
@@ -377,6 +475,27 @@ function showFail() {
   $("mkv").textContent = "–";
   share = "";
 }
+let NATION = [];
+async function loadNation() {
+  try {
+    const u = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + PROVINCES.map(p => p[1]).join(",") +
+      "&longitude=" + PROVINCES.map(p => p[2]).join(",") + "&current=pm2_5&timezone=Asia%2FBangkok";
+    const r = await fetch(u); if (!r.ok) throw new Error("HTTP " + r.status);
+    const d = await r.json(), arr = Array.isArray(d) ? d : [d];
+    NATION = PROVINCES.map((_, i) => arr[i] && arr[i].current && arr[i].current.pm2_5 != null ? arr[i].current.pm2_5 : null);
+    if (!NATION.some(v => v != null)) throw new Error("no data");
+    const chip = i => { const v = NATION[i], lv = v == null ? null : levelOf(v);
+      return `<button class="nc" data-i="${i}" style="--c:${lv ? lv.tint : "#999"}" aria-label="${PROVINCES[i][0]} ${v == null ? "ไม่มีข้อมูล" : Math.round(v)}"><b>${PROVINCES[i][0]}</b><span>${v == null ? "–" : Math.round(v)}</span></button>`; };
+    const top = PROVINCES.map((_, i) => i).filter(i => NATION[i] != null).sort((a, b) => NATION[b] - NATION[a]).slice(0, 5);
+    $("top5").innerHTML = `<p class="rg">สูงสุด 5 อันดับตอนนี้</p><div class="ng">${top.map(chip).join("")}</div>`;
+    $("ngrid").innerHTML = REGIONS.map(r => `<p class="rg">${r}</p><div class="ng">${PROVINCES.map((p, i) => p[3] === r ? chip(i) : "").join("")}</div>`).join("");
+    $("nation").hidden = false;
+  } catch (e) { console.error(e); $("nation").hidden = true; }
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest(".nc"); if (!b) return;
+  p1.value = b.dataset.i; update(); window.scrollTo({ top: 0, behavior: "smooth" });
+});
 let seq = 0;
 let share = "";
 async function update() {
@@ -426,6 +545,7 @@ $("fs").onclick = () => { fs = (fs + 1) % 3; document.documentElement.style.font
   toast(["ตัวอักษรปกติ", "ตัวอักษรใหญ่", "ตัวอักษรใหญ่มาก"][fs]); };
 p1.addEventListener("change", update); p2.addEventListener("change", update);
 update();
+loadNation();
 </script>
 </body>
 </html>
