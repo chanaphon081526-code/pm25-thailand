@@ -3,7 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ฝุ่นวันนี้ — PM2.5 ดูได้ใน 3 วินาที</title>
+<title>ฝุ่นวันนี้ — PM2.5 รายจังหวัด ทั้ง 77 จังหวัด</title>
+<meta name="description" content="ดูฝุ่น PM2.5 ทั้ง 77 จังหวัด พร้อมคำแนะนำที่ทำตามได้ทันที กราฟย้อนหลัง และพยากรณ์ล่วงหน้าจากโมเดลที่ทดสอบและรายงานผลตามจริง โปรเจกต์เพื่อการศึกษา">
+<meta property="og:title" content="ฝุ่นวันนี้ — PM2.5 รายจังหวัด">
+<meta property="og:description" content="ดูฝุ่น PM2.5 ทั้ง 77 จังหวัด พร้อมคำแนะนำและพยากรณ์ล่วงหน้า">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%AB%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;700;800&family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
@@ -37,7 +42,7 @@ select, button { font: inherit; color: var(--ink); background: var(--panel); bor
   min-height: 48px; padding: 8px 14px; }
 button { cursor: pointer; font-weight: 600; }
 select:focus-visible, button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
-main { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 18px 16px 120px; display: grid; gap: 14px; }
+main { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 18px 16px 120px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
 .card { background: var(--panel); border: 1px solid var(--edge); border-radius: 24px; padding: 20px; backdrop-filter: blur(10px); }
 .logo, .big b, .head, .badge, h2, .place, .chk { font-family: var(--head); }
 .place { font-weight: 600; color: var(--muted); margin: 0; }
@@ -89,6 +94,7 @@ svg#chart { width: 100%; height: auto; display: block; color: var(--muted); }
 .help { margin-top: 8px; font-size: .95rem; color: var(--muted); }
 .help summary { cursor: pointer; font-weight: 600; color: var(--ink); min-height: 32px; }
 .help p { margin: 6px 0 0; }
+.row select { flex: 1 1 180px; min-width: 0; max-width: 100%; }
 .bar .logo { white-space: nowrap; flex: none; margin-right: 0; }
 .bar select { flex: 1 1 0; min-width: 0; max-width: 220px; margin-left: auto; }
 .ng { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; margin-bottom: 8px; }
@@ -106,6 +112,7 @@ svg#chart { width: 100%; height: auto; display: block; color: var(--muted); }
 </style>
 </head>
 <body>
+<noscript><p style="padding:16px;background:#fff;color:#000">เว็บนี้ต้องเปิด JavaScript จึงจะแสดงข้อมูลฝุ่นได้</p></noscript>
 <canvas id="haze" aria-hidden="true"></canvas>
 <svg id="hills" viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true">
   <path id="h1" d="M0 120 L70 70 L140 110 L230 50 L330 105 L420 60 L520 100 L600 70 L600 200 L0 200Z" fill="#8aa7b4"/>
@@ -188,7 +195,7 @@ svg#chart { width: 100%; height: auto; display: block; color: var(--muted); }
     <p>การเทียบเป็นมวนบุหรี่เป็นการประมาณของ Berkeley Earth (22 µg/m³ ≈ 1 มวนต่อวัน) ไม่ใช่คำแนะนำทางการแพทย์</p>
   </details>
   <p class="credit">ข้อมูลฝุ่นและสภาพอากาศโดย <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0)
-    ข้อมูลฝุ่นมาจากแบบจำลอง CAMS ของ Copernicus Atmosphere Monitoring Service (ECMWF) · โปรเจกต์เพื่อการศึกษา</p>
+    ข้อมูลฝุ่นมาจากแบบจำลอง CAMS ของ Copernicus Atmosphere Monitoring Service (ECMWF) · โปรเจกต์เพื่อการศึกษา · <a href="https://github.com/chanaphon081526-code/pm25-thailand" target="_blank" rel="noopener">โค้ดและวิธีทำบน GitHub</a></p>
 </main>
 <div class="toast" id="toast" role="status"></div>
 
@@ -478,11 +485,18 @@ function showFail() {
 let NATION = [];
 async function loadNation() {
   try {
+    const KEY = "nation77", now = Date.now();
+    let arr = null;
+    try { const c = JSON.parse(localStorage.getItem(KEY) || "null"); if (c && now - c.t < 30 * 60e3 && c.v.length === PROVINCES.length) arr = c.v; } catch (e) {}
+    if (!arr) {
     const u = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + PROVINCES.map(p => p[1]).join(",") +
       "&longitude=" + PROVINCES.map(p => p[2]).join(",") + "&current=pm2_5&timezone=Asia%2FBangkok";
     const r = await fetch(u); if (!r.ok) throw new Error("HTTP " + r.status);
-    const d = await r.json(), arr = Array.isArray(d) ? d : [d];
-    NATION = PROVINCES.map((_, i) => arr[i] && arr[i].current && arr[i].current.pm2_5 != null ? arr[i].current.pm2_5 : null);
+    const d = await r.json(), raw = Array.isArray(d) ? d : [d];
+    arr = PROVINCES.map((_, i) => raw[i] && raw[i].current && raw[i].current.pm2_5 != null ? raw[i].current.pm2_5 : null);
+    try { localStorage.setItem(KEY, JSON.stringify({ t: now, v: arr })); } catch (e) {}
+    }
+    NATION = arr;
     if (!NATION.some(v => v != null)) throw new Error("no data");
     const chip = i => { const v = NATION[i], lv = v == null ? null : levelOf(v);
       return `<button class="nc" data-i="${i}" style="--c:${lv ? lv.tint : "#999"}" aria-label="${PROVINCES[i][0]} ${v == null ? "ไม่มีข้อมูล" : Math.round(v)}"><b>${PROVINCES[i][0]}</b><span>${v == null ? "–" : Math.round(v)}</span></button>`; };
@@ -545,7 +559,7 @@ $("fs").onclick = () => { fs = (fs + 1) % 3; document.documentElement.style.font
   toast(["ตัวอักษรปกติ", "ตัวอักษรใหญ่", "ตัวอักษรใหญ่มาก"][fs]); };
 p1.addEventListener("change", update); p2.addEventListener("change", update);
 update();
-loadNation();
+setTimeout(loadNation, 1200);
 </script>
 </body>
 </html>
