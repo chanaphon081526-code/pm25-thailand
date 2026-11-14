@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-14T18:00:34+00:00",
+  "generated_at": "2026-11-14T22:24:02+00:00",
   "data_source": "Open-Meteo Air Quality API (CAMS model data)",
   "horizons": [
     3,
@@ -11,40 +11,40 @@
   "provinces": {
     "kanchanaburi": {
       "name": "กาญจนบุรี",
-      "origin_time": "2026-11-15T01:00",
-      "current_pm25": 20.1,
+      "origin_time": "2026-11-15T05:00",
+      "current_pm25": 16.8,
       "forecasts": [
         {
           "horizon_h": 3,
-          "target_time": "2026-11-15T04:00",
-          "pm25": 17.6,
-          "low": 15.7,
-          "high": 21.2,
+          "target_time": "2026-11-15T08:00",
+          "pm25": 15.5,
+          "low": 11.7,
+          "high": 20.5,
           "level": "ดี"
         },
         {
           "horizon_h": 6,
-          "target_time": "2026-11-15T07:00",
-          "pm25": 15.7,
-          "low": 11.0,
-          "high": 24.8,
-          "level": "ดี"
+          "target_time": "2026-11-15T11:00",
+          "pm25": 14.2,
+          "low": 9.2,
+          "high": 21.4,
+          "level": "ดีมาก"
         },
         {
           "horizon_h": 12,
-          "target_time": "2026-11-15T13:00",
-          "pm25": 13.5,
-          "low": 8.8,
-          "high": 20.0,
+          "target_time": "2026-11-15T17:00",
+          "pm25": 14.7,
+          "low": 7.9,
+          "high": 22.9,
           "level": "ดีมาก"
         },
         {
           "horizon_h": 24,
-          "target_time": "2026-11-16T01:00",
-          "pm25": 15.2,
-          "low": 10.8,
-          "high": 23.2,
-          "level": "ดี"
+          "target_time": "2026-11-16T05:00",
+          "pm25": 14.8,
+          "low": 8.8,
+          "high": 21.9,
+          "level": "ดีมาก"
         }
       ],
       "metrics": {
@@ -194,40 +194,40 @@
     },
     "chiangmai": {
       "name": "เชียงใหม่",
-      "origin_time": "2026-11-15T01:00",
-      "current_pm25": 33.3,
+      "origin_time": "2026-11-15T05:00",
+      "current_pm25": 27.2,
       "forecasts": [
         {
           "horizon_h": 3,
-          "target_time": "2026-11-15T04:00",
-          "pm25": 26.8,
-          "low": 23.8,
-          "high": 31.8,
-          "level": "ปานกลาง"
+          "target_time": "2026-11-15T08:00",
+          "pm25": 22.7,
+          "low": 15.2,
+          "high": 29.7,
+          "level": "ดี"
         },
         {
           "horizon_h": 6,
-          "target_time": "2026-11-15T07:00",
-          "pm25": 21.6,
-          "low": 13.4,
-          "high": 28.9,
+          "target_time": "2026-11-15T11:00",
+          "pm25": 16.1,
+          "low": 8.9,
+          "high": 19.7,
           "level": "ดี"
         },
         {
           "horizon_h": 12,
-          "target_time": "2026-11-15T13:00",
-          "pm25": 10.4,
-          "low": 7.2,
-          "high": 13.7,
+          "target_time": "2026-11-15T17:00",
+          "pm25": 12.9,
+          "low": 8.0,
+          "high": 15.8,
           "level": "ดีมาก"
         },
         {
           "horizon_h": 24,
-          "target_time": "2026-11-16T01:00",
-          "pm25": 29.4,
-          "low": 19.1,
-          "high": 39.1,
-          "level": "ปานกลาง"
+          "target_time": "2026-11-16T05:00",
+          "pm25": 23.9,
+          "low": 17.4,
+          "high": 31.7,
+          "level": "ดี"
         }
       ],
       "metrics": {
@@ -377,40 +377,40 @@
     },
     "bangkok": {
       "name": "กรุงเทพฯ",
-      "origin_time": "2026-11-15T01:00",
-      "current_pm25": 27.2,
+      "origin_time": "2026-11-15T05:00",
+      "current_pm25": 33.9,
       "forecasts": [
         {
           "horizon_h": 3,
-          "target_time": "2026-11-15T04:00",
-          "pm25": 26.9,
-          "low": 18.8,
-          "high": 29.3,
+          "target_time": "2026-11-15T08:00",
+          "pm25": 32.6,
+          "low": 25.2,
+          "high": 44.1,
           "level": "ปานกลาง"
         },
         {
           "horizon_h": 6,
-          "target_time": "2026-11-15T07:00",
-          "pm25": 25.0,
-          "low": 15.7,
-          "high": 36.3,
-          "level": "ดี"
+          "target_time": "2026-11-15T11:00",
+          "pm25": 28.0,
+          "low": 20.5,
+          "high": 38.8,
+          "level": "ปานกลาง"
         },
         {
           "horizon_h": 12,
-          "target_time": "2026-11-15T13:00",
-          "pm25": 28.1,
-          "low": 18.5,
-          "high": 37.1,
+          "target_time": "2026-11-15T17:00",
+          "pm25": 35.2,
+          "low": 20.2,
+          "high": 46.6,
           "level": "ปานกลาง"
         },
         {
           "horizon_h": 24,
-          "target_time": "2026-11-16T01:00",
-          "pm25": 22.9,
-          "low": 13.4,
-          "high": 34.0,
-          "level": "ดี"
+          "target_time": "2026-11-16T05:00",
+          "pm25": 27.5,
+          "low": 14.3,
+          "high": 40.5,
+          "level": "ปานกลาง"
         }
       ],
       "metrics": {
